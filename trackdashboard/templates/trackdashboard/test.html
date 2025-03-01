@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Activity List</title>
+    <script>
+        // BMI Calculator Function
+        function calculateBMI() {
+            const weight = parseFloat(document.getElementById('weight').value);
+            const height = parseFloat(document.getElementById('height').value) / 100; // convert cm to meters
+            
+            if (weight && height) {
+                const bmi = weight / (height * height);
+                const bmiResult = document.getElementById('bmi-result');
+                bmiResult.textContent = bmi.toFixed(1);
+                
+                // BMI Categories
+                let category = "";
+                if (bmi < 18.5) category = "Underweight";
+                else if (bmi < 25) category = "Normal weight";
+                else if (bmi < 30) category = "Overweight";
+                else category = "Obese";
+                
+                document.getElementById('bmi-category').textContent = category;
+                document.getElementById('bmi-display').style.display = 'block';
+            }
+        }
+        
+        // Calorie Burn Estimation
+        function calculateCalories() {
+            const activity = document.getElementById('calc-activity').value;
+            const weight = parseFloat(document.getElementById('calc-weight').value);
+            const duration = parseFloat(document.getElementById('calc-duration').value);
+            
+            // MET values (Metabolic Equivalent of Task)
+            const metValues = {
+                'running': 9.8,
+                'walking': 3.5,
+                'cycling': 7.5,
+                'swimming': 8.3,
+                'yoga': 2.5,
+                'weight_training': 3.5
+            };
+            
+            if (activity && weight && duration) {
+                // Calories burned = MET × weight(kg) × duration(hours)
+                const met = metValues[activity] || 4.0; // default to 4.0 if activity not found
+                const caloriesBurned = met * weight * (duration / 60);
+                document.getElementById('calories-result').textContent = Math.round(caloriesBurned);
+                document.getElementById('calories-display').style.display = 'block';
+            }
+        }
+        
+        // Sleep Quality Score
+        function calculateSleepScore() {
+            const duration = parseFloat(document.getElementById('sleep-duration').value);
+            const quality = parseInt(document.getElementById('sleep-quality').value);
+            const wakeups = parseInt(document.getElementById('sleep-wakeups').value);
+            
+            if (duration && quality) {
+                // Simple sleep score calculation
+                // Duration factor (optimal is 7-9 hours)
+                let durationScore = 0;
+                if (duration >= 7 && duration <= 9) durationScore = 50;
+                else if (duration >= 6 && duration < 7) durationScore = 40;
+                else if (duration > 9 && duration <= 10) durationScore = 40;
+                else if (duration >= 5 && duration < 6) durationScore = 30;
+                else if (duration > 10) durationScore = 30;
+                else durationScore = 20;
+                
+                // Quality factor (1-10)
+                const qualityScore = quality * 5;
+                
+                // Wakeups deduction
+                const wakeupDeduction = wakeups * 5;
+                
+                // Calculate final score (max 100)
+                let sleepScore = durationScore + qualityScore - wakeupDeduction;
+                sleepScore = Math.max(0, Math.min(100, sleepScore));
+                
+                document.getElementById('sleep-score').textContent = sleepScore;
+                
+                // Sleep quality interpretation
+                let interpretation = "";
+                if (sleepScore >= 90) interpretation = "Excellent";
+                else if (sleepScore >= 75) interpretation = "Good";
+                else if (sleepScore >= 60) interpretation = "Fair";
+                else if (sleepScore >= 40) interpretation = "Poor";
+                else interpretation = "Very Poor";
+                
+                document.getElementById('sleep-interpretation').textContent = interpretation;
+                document.getElementById('sleep-display').style.display = 'block';
+            }
+        }
+        
+        // Protein Calculator
+        function calculateProtein() {
+            // Protein database - food name and protein per 100g
+            const proteinDatabase = {
+                'chicken_breast': 31,
+                'beef_steak': 26,
+                'salmon': 25,
+                'tofu': 8,
+                'eggs': 13,
+                'greek_yogurt': 10,
+                'milk': 3.4,
+                'cheddar_cheese': 25,
+                'lentils': 9,
+                'chickpeas': 8.9,
+                'black_beans': 8.9,
+                'peanut_butter': 25,
+                'almonds': 21,
+                'quinoa': 4.4,
+                'oats': 16.9,
+                'whey_protein': 80,
+                'protein_bar': 20,
+                'tuna': 30,
+                'turkey_breast': 29,
+                'cottage_cheese': 11
+            };
+            
+            // Get all selected foods
+            const selectedFoods = document.querySelectorAll('.protein-food-item');
+            let totalProtein = 0;
+            let foodDetails = [];
+            
+            // Calculate total protein
+            selectedFoods.forEach(item => {
+                const foodType = item.querySelector('.food-select').value;
+                const quantity = parseFloat(item.querySelector('.food-quantity').value);
+                
+                if (foodType && quantity && proteinDatabase[foodType]) {
+                    const proteinAmount = (proteinDatabase[foodType] * quantity / 100);
+                    totalProtein += proteinAmount;
+                    
+                    // Store details for display
+                    const foodName = foodType.replace(/_/g, ' ');
+                    foodDetails.push({
+                        name: foodName.charAt(0).toUpperCase() + foodName.slice(1),
+                        protein: proteinAmount.toFixed(1),
+                        quantity: quantity
+                    });
+                }
+            });
+            
+            if (totalProtein > 0) {
+                // Update the result
+                document.getElementById('protein-total').textContent = totalProtein.toFixed(1);
+                
+                // Calculate the percentage of daily needs
+                const weight = parseFloat(document.getElementById('protein-weight').value) || 70;
+                const activityLevel = document.getElementById('protein-activity').value;
+                
+                // Protein recommendations based on activity level (g per kg of bodyweight)
+                let proteinMultiplier = 0.8; // RDA
+                if (activityLevel === 'moderate') proteinMultiplier = 1.2;
+                else if (activityLevel === 'active') proteinMultiplier = 1.6;
+                else if (activityLevel === 'athlete') proteinMultiplier = 2.0;
+                
+                const dailyNeeds = weight * proteinMultiplier;
+                const percentageOfNeeds = (totalProtein / dailyNeeds) * 100;
+                
+                document.getElementById('protein-daily-needs').textContent = dailyNeeds.toFixed(1);
+                document.getElementById('protein-percentage').textContent = percentageOfNeeds.toFixed(1);
+                
+                // Create the breakdown list
+                const breakdownList = document.getElementById('protein-breakdown-list');
+                breakdownList.innerHTML = '';
+                
+                foodDetails.forEach(food => {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = `${food.name} (${food.quantity}g): ${food.protein}g protein`;
+                    breakdownList.appendChild(listItem);
+                });
+                
+                // Show the results
+                document.getElementById('protein-display').style.display = 'block';
+                document.getElementById('protein-breakdown').style.display = 'block';
+            }
+        }
+        
+        // Add more food items to protein calculator
+        function addFoodItem() {
+            const container = document.getElementById('protein-foods-container');
+            const newItem = document.createElement('div');
+            newItem.className = 'protein-food-item';
+            newItem.innerHTML = `
+                <select class="food-select">
+                    <option value="">Select food</option>
+                    <option value="chicken_breast">Chicken Breast</option>
+                    <option value="beef_steak">Beef Steak</option>
+                    <option value="salmon">Salmon</option>
+                    <option value="tofu">Tofu</option>
+                    <option value="eggs">Eggs</option>
+                    <option value="greek_yogurt">Greek Yogurt</option>
+                    <option value="milk">Milk</option>
+                    <option value="cheddar_cheese">Cheddar Cheese</option>
+                    <option value="lentils">Lentils</option>
+                    <option value="chickpeas">Chickpeas</option>
+                    <option value="black_beans">Black Beans</option>
+                    <option value="peanut_butter">Peanut Butter</option>
+                    <option value="almonds">Almonds</option>
+                    <option value="quinoa">Quinoa</option>
+                    <option value="oats">Oats</option>
+                    <option value="whey_protein">Whey Protein</option>
+                    <option value="protein_bar">Protein Bar</option>
+                    <option value="tuna">Tuna</option>
+                    <option value="turkey_breast">Turkey Breast</option>
+                    <option value="cottage_cheese">Cottage Cheese</option>
+                </select>
+                <input type="number" class="food-quantity" placeholder="Grams" min="1" max="1000">
+                <button type="button" class="remove-food" onclick="this.parentElement.remove();">×</button>
+            `;
+            container.appendChild(newItem);
+        }
+    </script>
+</head>
+
+<body>
+    <nav>
+        {% if user.is_authenticated %}
+    <a href="{% url 'logout' %}">Logout</a>
+{% else %}
+    <a href="{% url 'login' %}">Login</a>
+    <a href="{% url 'signup' %}">Sign Up</a>
+{% endif %}
+    </nav>
+
+    <h1>Activity List</h1>
+    <a href="{% url 'create_activity' %}" class="actions">Create Activity</a>
+    <table border="1">
+        <tr>
+            <th>Activity Type</th>
+            <th>Duration (min)</th>
+            <th>Distance (km)</th>
+            <th>Calories Burned</th>
+            <th>Date</th>
+            <th>Actions</th>
+        </tr>
+        {% for activity in activities %}
+        <tr>
+            <td>{{ activity.activity_type }}</td>
+            <td>{{ activity.duration }}</td>
+            <td>{{ activity.distance }}</td>
+            <td>{{ activity.calories_burned }}</td>
+            <td>{{ activity.date }}</td>
+            <td>
+                <a href="{% url 'view_activity' activity.pk %}">View</a> |
+                <a href="{% url 'update_activity' activity.pk %}">Edit</a> |
+                <a href="{% url 'delete_activity' activity.id %}" onclick="return confirm('Are you sure?');">Delete</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    
+    <!-- Protein Calculator Section -->
+    <h1>Protein Intake Calculator</h1>
+    <div class="tool-card protein-tool-card">
+        <h2>Protein Calculator</h2>
+        <div>
+            <label for="protein-weight">Your Weight (kg):</label>
+            <input type="number" id="protein-weight" placeholder="Enter your weight in kg" min="30" max="300" step="0.1">
+        </div>
+        <div>
+            <label for="protein-activity">Activity Level:</label>
+            <select id="protein-activity">
+                <option value="sedentary">Sedentary (little or no exercise)</option>
+                <option value="moderate">Moderately active (light exercise 1-3 days/week)</option>
+                <option value="active" selected>Active (moderate exercise 3-5 days/week)</option>
+                <option value="athlete">Very active (hard exercise 6-7 days/week)</option>
+            </select>
+        </div>
+        
+        <h3>Add Food Items</h3>
+        <button type="button" class="add-food-btn" onclick="addFoodItem()">+ Add Food Item</button>
+        
+        <div id="protein-foods-container">
+            <div class="protein-food-item">
+                <select class="food-select">
+                    <option value="">Select food</option>
+                    <option value="chicken_breast">Chicken Breast</option>
+                    <option value="beef_steak">Beef Steak</option>
+                    <option value="salmon">Salmon</option>
+                    <option value="tofu">Tofu</option>
+                    <option value="eggs">Eggs</option>
+                    <option value="greek_yogurt">Greek Yogurt</option>
+                    <option value="milk">Milk</option>
+                    <option value="cheddar_cheese">Cheddar Cheese</option>
+                    <option value="lentils">Lentils</option>
+                    <option value="chickpeas">Chickpeas</option>
+                    <option value="black_beans">Black Beans</option>
+                    <option value="peanut_butter">Peanut Butter</option>
+                    <option value="almonds">Almonds</option>
+                    <option value="quinoa">Quinoa</option>
+                    <option value="oats">Oats</option>
+                    <option value="whey_protein">Whey Protein</option>
+                    <option value="protein_bar">Protein Bar</option>
+                    <option value="tuna">Tuna</option>
+                    <option value="turkey_breast">Turkey Breast</option>
+                    <option value="cottage_cheese">Cottage Cheese</option>
+                </select>
+                <input type="number" class="food-quantity" placeholder="Grams" min="1" max="1000">
+                <button type="button" class="remove-food" onclick="this.parentElement.remove();">×</button>
+            </div>
+        </div>
+        
+        <button onclick="calculateProtein()">Calculate Protein</button>
+        
+        <div id="protein-display" class="result-display">
+            <h3>Protein Summary</h3>
+            <div class="value"><span id="protein-total">0</span>g protein</div>
+            <div class="interpretation">Daily recommended: <span id="protein-daily-needs">0</span>g</div>
+            <div class="progress-container">
+                <div class="progress-bar" id="protein-progress-bar" style="width: 0%">
+                    <span class="progress-text"><span id="protein-percentage">0</span>%</span>
+                </div>
+            </div>
+            <script>
+                document.getElementById('protein-display').addEventListener('DOMSubtreeModified', function() {
+                    const percentage = parseFloat(document.getElementById('protein-percentage').textContent);
+                    const progressBar = document.getElementById('protein-progress-bar');
+                    progressBar.style.width = Math.min(percentage, 100) + '%';
+                });
+            </script>
+        </div>
+        
+        <div id="protein-breakdown" class="protein-breakdown">
+            <h3>Food Breakdown</h3>
+            <ul id="protein-breakdown-list">
+                <!-- Protein items will be added here -->
+            </ul>
+        </div>
+    </div>
+    
+    <!-- Health Tools Section -->
+    <h1>Health Tools</h1>
+    <div class="health-tools">
+        <!-- BMI Calculator Card -->
+        <div class="tool-card">
+            <h2>BMI Calculator</h2>
+            <div>
+                <label for="weight">Weight (kg):</label>
+                <input type="number" id="weight" placeholder="Enter weight in kg" min="30" max="300" step="0.1">
+            </div>
+            <div>
+                <label for="height">Height (cm):</label>
+                <input type="number" id="height" placeholder="Enter height in cm" min="100" max="250" step="0.1">
+            </div>
+            <button onclick="calculateBMI()">Calculate BMI</button>
+            
+            <div id="bmi-display" class="result-display">
+                <h3>Your BMI</h3>
+                <div class="value" id="bmi-result">0.0</div>
+                <div class="interpretation">Category: <span id="bmi-category">-</span></div>
+            </div>
+        </div>
+        
+        <!-- Calorie Calculator Card -->
+        <div class="tool-card">
+            <h2>Calorie Burn Estimator</h2>
+            <div>
+                <label for="calc-activity">Activity:</label>
+                <select id="calc-activity">
+                    <option value="">Select an activity</option>
+                    <option value="running">Running</option>
+                    <option value="walking">Walking</option>
+                    <option value="cycling">Cycling</option>
+                    <option value="swimming">Swimming</option>
+                    <option value="yoga">Yoga</option>
+                    <option value="weight_training">Weight Training</option>
+                </select>
+            </div>
+            <div>
+                <label for="calc-weight">Weight (kg):</label>
+                <input type="number" id="calc-weight" placeholder="Enter weight in kg" min="30" max="300" step="0.1">
+            </div>
+            <div>
+                <label for="calc-duration">Duration (minutes):</label>
+                <input type="number" id="calc-duration" placeholder="Enter duration in minutes" min="5" max="500">
+            </div>
+            <button onclick="calculateCalories()">Estimate Calories</button>
+            
+            <div id="calories-display" class="result-display">
+                <h3>Calories Burned</h3>
+                <div class="value"><span id="calories-result">0</span> kcal</div>
+                <div class="interpretation">Based on activity type, weight, and duration</div>
+            </div>
+        </div>
+        
+        <!-- Sleep Tracker Card -->
+        <div class="tool-card">
+            <h2>Sleep Quality Tracker</h2>
+            <div>
+                <label for="sleep-date">Date:</label>
+                <input type="date" id="sleep-date">
+            </div>
+            <div>
+                <label for="sleep-duration">Duration (hours):</label>
+                <input type="number" id="sleep-duration" placeholder="Hours of sleep" min="0" max="24" step="0.1">
+            </div>
+            <div>
+                <label for="sleep-quality">Sleep Quality (1-10):</label>
+                <input type="range" id="sleep-quality" min="1" max="10" step="1" value="5">
+                <span id="quality-value">5</span>
+                <script>
+                    document.getElementById('sleep-quality').addEventListener('input', function() {
+                        document.getElementById('quality-value').textContent = this.value;
+                    });
+                </script>
+            </div>
+            <div>
+                <label for="sleep-wakeups">Number of Wake-ups:</label>
+                <input type="number" id="sleep-wakeups" placeholder="Times woken up" min="0" max="20" value="0">
+            </div>
+            <button onclick="calculateSleepScore()">Calculate Sleep Score</button>
+            
+            <div id="sleep-display" class="result-display">
+                <h3>Sleep Quality Score</h3>
+                <div class="value"><span id="sleep-score">0</span>/100</div>
+                <div class="interpretation">Quality: <span id="sleep-interpretation">-</span></div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

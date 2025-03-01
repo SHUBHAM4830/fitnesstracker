@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FitTrack | Activity Tracking</title>
+    <style>
+        /* Base Styles & Variables */
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f7f7f7;
+            --text-primary: #121212;
+            --text-secondary: #555555;
+            --accent: #1a1a1a;
+            --accent-hover: #333333;
+            --card-bg: #ffffff;
+            --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --border: 1px solid #e0e0e0;
+            --success: #32a852;
+            --warning: #e6a23c;
+            --danger: #e53935;
+            --transition: all 0.3s ease;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #121212;
+            --bg-secondary: #1e1e1e;
+            --text-primary: #ffffff;
+            --text-secondary: #b3b3b3;
+            --accent: #ffffff;
+            --accent-hover: #e0e0e0;
+            --card-bg: #1e1e1e;
+            --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            --border: 1px solid #333333;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            transition: var(--transition);
+            line-height: 1.6;
+        }
+
+        /* Typography */
+        h1, h2, h3, h4, h5, h6 {
+            font-weight: 700;
+            margin: 1rem 0;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin: 2rem 0 1.5rem;
+            text-align: center;
+        }
+        
+        h2 {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+        }
+        
+        h3 {
+            font-size: 1.4rem;
+            margin-bottom: 0.8rem;
+        }
+
+        a {
+            color: var(--accent);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        a:hover {
+            color: var(--accent-hover);
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 16px;
+            background-color: var(--accent);
+            color: var(--bg-primary);
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 16px;
+            margin: 0.5rem 0;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 2px solid var(--accent);
+            color: var(--text-primary);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--accent);
+            color: var(--bg-primary);
+        }
+
+        /* Layout */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            min-height: calc(100vh - 70px - 100px); /* Accounting for header and footer */
+            padding: 20px 0;
+        }
+
+        /* Header */
+        .header {
+            height: 70px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            backdrop-filter: blur(10px);
+            background-color: var(--bg-primary);
+            z-index: 100;
+            border-bottom: var(--border);
+        }
+
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+
+        .logo {
+            font-size: 40px;
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
+
+        .logo span {
+            font-weight: 300;
+        }
+
+        /* Footer */
+        .footer {
+            background-color: var(--bg-secondary);
+            padding: 40px 0;
+            text-align: center;
+            border-top: var(--border);
+            font-size: 18px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 40px;
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .social-icon {
+            color: var(--text-primary);
+            transition: var(--transition);
+            width: 32px;
+            height: 32px;
+        }
+
+        .social-icon:hover {
+            color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .social-icon svg {
+            width: 100%;
+            height: 100%;
+            fill: currentColor;
+        }
+        
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0 2rem;
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+        }
+        
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: var(--border);
+        }
+        
+        th {
+            background-color: var(--bg-secondary);
+            font-weight: 600;
+        }
+        
+        tr:last-child td {
+            border-bottom: none;
+        }
+        
+        tr:hover {
+            background-color: var(--bg-secondary);
+        }
+        
+        /* Card styles for tools */
+        .health-tools {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 30px;
+            margin: 2rem 0;
+        }
+        
+        .tool-card {
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            box-shadow: var(--card-shadow);
+            padding: 25px;
+            transition: var(--transition);
+        }
+        
+        .tool-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        }
+        
+        .tool-card label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+        
+        .tool-card input, 
+        .tool-card select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+            border: var(--border);
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+        }
+        
+        /* Result display styles */
+        .result-display {
+            margin-top: 1.5rem;
+            padding: 15px;
+            background-color: var(--bg-secondary);
+            border-radius: 8px;
+            display: none;
+        }
+        
+        .result-display .value {
+            font-size: 2rem;
+            font-weight: 700;
+            text-align: center;
+            margin: 0.5rem 0;
+        }
+        
+        .result-display .interpretation {
+            text-align: center;
+            color: var(--text-secondary);
+        }
+        
+        /* Progress bar for protein calculator */
+        .progress-container {
+            margin: 15px 0;
+            background-color: var(--bg-primary);
+            border-radius: 10px;
+            height: 20px;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            border-radius: 10px;
+            background-color: var(--success);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: width 0.5s ease;
+            min-width: 20px;
+        }
+        
+        .progress-text {
+            color: white;
+            font-weight: 600;
+            font-size: 0.8rem;
+        }
+        
+        /* Protein calculator specific styles */
+        .protein-tool-card {
+            grid-column: 1 / -1;
+        }
+        
+        .protein-food-item {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .food-select {
+            flex-grow: 2;
+        }
+        
+        .food-quantity {
+            flex-grow: 1;
+            max-width: 120px;
+        }
+        
+        .remove-food {
+            background-color: var(--danger);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            font-size: 20px;
+            line-height: 1;
+            padding: 0;
+        }
+        
+        .protein-breakdown {
+            margin-top: 1.5rem;
+            display: none;
+        }
+        
+        #protein-breakdown-list {
+            list-style-type: none;
+            padding: 10px;
+            background-color: var(--bg-secondary);
+            border-radius: 8px;
+        }
+        
+        #protein-breakdown-list li {
+            padding: 5px 0;
+            border-bottom: var(--border);
+        }
+        
+        #protein-breakdown-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .add-food-btn {
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            border: var(--border);
+            border-radius: 6px;
+            padding: 8px 12px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .add-food-btn:hover {
+            background-color: var(--accent);
+            color: var(--bg-primary);
+        }
+        
+        /* Chart containers */
+        .chart-container {
+            width: 100%;
+            height: 200px;
+            margin: 1rem 0;
+            position: relative;
+        }
+        
+        /* Actions button */
+        .actions {
+            display: inline-block;
+            padding: 10px 16px;
+            background-color: var(--accent);
+            color: var(--bg-primary);
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            margin: 0 auto 1rem;
+            text-align: center;
+        }
+        
+        .actions-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+        
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-in {
+            animation: fadeIn 0.3s ease forwards;
+        }
+        
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            .health-tools {
+                grid-template-columns: 1fr;
+            }
+            
+            .header {
+                height: auto;
+                padding: 15px 0;
+            }
+            
+            .logo {
+                font-size: 30px;
+            }
+            
+            .footer {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            table {
+                font-size: 14px;
+            }
+            
+            th, td {
+                padding: 8px 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container header-container">
+            <div class="logo">Fit<span>Track</span></div>
+            <div style="display: flex; align-items: center; gap: 20px;">
+                {% if user.is_authenticated %}
+                <a href="{% url 'logout' %}" class="btn">Logout</a>
+                {% else %}
+                <a href="{% url 'login' %}" class="btn btn-outline">Login</a>
+                <a href="{% url 'signup' %}" class="btn btn-outline">Sign Up</a>
+                {% endif %}
+                <button id="themeToggle" class="btn btn-outline">🌙 Dark Mode</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container main-content">
+        <h1>Your Activities</h1>
+        
+        <div class="actions-container">
+            <a href="{% url 'create_activity' %}" class="actions">+ Create New Activity</a>
+        </div>
+        
+        <table>
+            <tr>
+                <th>Activity Type</th>
+                <th>Duration (min)</th>
+                <th>Distance (km)</th>
+                <th>Calories Burned</th>
+                <th>Date</th>
+                <th>Actions</th>
+            </tr>
+            {% for activity in activities %}
+            <tr>
+                <td>{{ activity.activity_type }}</td>
+                <td>{{ activity.duration }}</td>
+                <td>{{ activity.distance }}</td>
+                <td>{{ activity.calories_burned }}</td>
+                <td>{{ activity.date }}</td>
+                <td>
+                    <a href="{% url 'view_activity' activity.pk %}">View</a> |
+                    <a href="{% url 'update_activity' activity.pk %}">Edit</a> |
+                    <a href="{% url 'delete_activity' activity.id %}" onclick="return confirm('Are you sure?');">Delete</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+
+        <!-- Activity Chart - New addition -->
+        <div class="tool-card">
+            <h2>Activity Overview</h2>
+            <div class="chart-container" id="activity-chart">
+                <!-- SVG chart will be inserted here by JavaScript -->
+            </div>
+        </div>
+        
+        <!-- Protein Calculator Section -->
+        <h1>Protein Intake Calculator</h1>
+        <div class="tool-card protein-tool-card">
+            <h2>Protein Calculator</h2>
+            <div>
+                <label for="protein-weight">Your Weight (kg):</label>
+                <input type="number" id="protein-weight" placeholder="Enter your weight in kg" min="30" max="300" step="0.1">
+            </div>
+            <div>
+                <label for="protein-activity">Activity Level:</label>
+                <select id="protein-activity">
+                    <option value="sedentary">Sedentary (little or no exercise)</option>
+                    <option value="moderate">Moderately active (light exercise 1-3 days/week)</option>
+                    <option value="active" selected>Active (moderate exercise 3-5 days/week)</option>
+                    <option value="athlete">Very active (hard exercise 6-7 days/week)</option>
+                </select>
+            </div>
+            
+            <h3>Add Food Items</h3>
+            <button type="button" class="add-food-btn" onclick="addFoodItem()">+ Add Food Item</button>
+            
+            <div id="protein-foods-container">
+                <div class="protein-food-item">
+                    <select class="food-select">
+                        <option value="">Select food</option>
+                        <option value="chicken_breast">Chicken Breast</option>
+                        <option value="beef_steak">Beef Steak</option>
+                        <option value="salmon">Salmon</option>
+                        <option value="tofu">Tofu</option>
+                        <option value="eggs">Eggs</option>
+                        <option value="greek_yogurt">Greek Yogurt</option>
+                        <option value="milk">Milk</option>
+                        <option value="cheddar_cheese">Cheddar Cheese</option>
+                        <option value="lentils">Lentils</option>
+                        <option value="chickpeas">Chickpeas</option>
+                        <option value="black_beans">Black Beans</option>
+                        <option value="peanut_butter">Peanut Butter</option>
+                        <option value="almonds">Almonds</option>
+                        <option value="quinoa">Quinoa</option>
+                        <option value="oats">Oats</option>
+                        <option value="whey_protein">Whey Protein</option>
+                        <option value="protein_bar">Protein Bar</option>
+                        <option value="tuna">Tuna</option>
+                        <option value="turkey_breast">Turkey Breast</option>
+                        <option value="cottage_cheese">Cottage Cheese</option>
+                    </select>
+                    <input type="number" class="food-quantity" placeholder="Grams" min="1" max="1000">
+                    <button type="button" class="remove-food" onclick="this.parentElement.remove();">×</button>
+                </div>
+            </div>
+            
+            <button onclick="calculateProtein()" class="btn">Calculate Protein</button>
+            
+            <div id="protein-display" class="result-display">
+                <h3>Protein Summary</h3>
+                <div class="value"><span id="protein-total">0</span>g protein</div>
+                <div class="interpretation">Daily recommended: <span id="protein-daily-needs">0</span>g</div>
+                <div class="progress-container">
+                    <div class="progress-bar" id="protein-progress-bar" style="width: 0%">
+                        <span class="progress-text"><span id="protein-percentage">0</span>%</span>
+                    </div>
+                </div>
+                
+                <!-- New: Protein Chart -->
+                <div class="chart-container" id="protein-chart">
+                    <!-- SVG chart will be inserted here by JavaScript -->
+                </div>
+            </div>
+            
+            <div id="protein-breakdown" class="protein-breakdown">
+                <h3>Food Breakdown</h3>
+                <ul id="protein-breakdown-list">
+                    <!-- Protein items will be added here -->
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Health Tools Section -->
+        <h1>Health Tools</h1>
+        <div class="health-tools">
+            <!-- BMI Calculator Card -->
+            <div class="tool-card">
+                <h2>BMI Calculator</h2>
+                <div>
+                    <label for="weight">Weight (kg):</label>
+                    <input type="number" id="weight" placeholder="Enter weight in kg" min="30" max="300" step="0.1">
+                </div>
+                <div>
+                    <label for="height">Height (cm):</label>
+                    <input type="number" id="height" placeholder="Enter height in cm" min="100" max="250" step="0.1">
+                </div>
+                <button onclick="calculateBMI()" class="btn">Calculate BMI</button>
+                
+                <div id="bmi-display" class="result-display">
+                    <h3>Your BMI</h3>
+                    <div class="value" id="bmi-result">0.0</div>
+                    <div class="interpretation">Category: <span id="bmi-category">-</span></div>
+                    
+                    <!-- New: BMI Chart -->
+                    <div class="chart-container" id="bmi-chart">
+                        <!-- SVG chart will be inserted here by JavaScript -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Calorie Calculator Card -->
+            <div class="tool-card">
+                <h2>Calorie Burn Estimator</h2>
+                <div>
+                    <label for="calc-activity">Activity:</label>
+                    <select id="calc-activity">
+                        <option value="">Select an activity</option>
+                        <option value="running">Running</option>
+                        <option value="walking">Walking</option>
+                        <option value="cycling">Cycling</option>
+                        <option value="swimming">Swimming</option>
+                        <option value="yoga">Yoga</option>
+                        <option value="weight_training">Weight Training</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="calc-weight">Weight (kg):</label>
+                    <input type="number" id="calc-weight" placeholder="Enter weight in kg" min="30" max="300" step="0.1">
+                </div>
+                <div>
+                    <label for="calc-duration">Duration (minutes):</label>
+                    <input type="number" id="calc-duration" placeholder="Enter duration in minutes" min="5" max="500">
+                </div>
+                <button onclick="calculateCalories()" class="btn">Estimate Calories</button>
+                
+                <div id="calories-display" class="result-display">
+                    <h3>Calories Burned</h3>
+                    <div class="value"><span id="calories-result">0</span> kcal</div>
+                    <div class="interpretation">Based on activity type, weight, and duration</div>
+                    
+                    <!-- New: Calories Chart -->
+                    <div class="chart-container" id="calories-chart">
+                        <!-- SVG chart will be inserted here by JavaScript -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sleep Tracker Card -->
+            <div class="tool-card">
+                <h2>Sleep Quality Tracker</h2>
+                <div>
+                    <label for="sleep-date">Date:</label>
+                    <input type="date" id="sleep-date">
+                </div>
+                <div>
+                    <label for="sleep-duration">Duration (hours):</label>
+                    <input type="number" id="sleep-duration" placeholder="Hours of sleep" min="0" max="24" step="0.1">
+                </div>
+                <div>
+                    <label for="sleep-quality">Sleep Quality (1-10):</label>
+                    <input type="range" id="sleep-quality" min="1" max="10" step="1" value="5">
+                    <span id="quality-value">5</span>
+                </div>
+                <div>
+                    <label for="sleep-wakeups">Number of Wake-ups:</label>
+                    <input type="number" id="sleep-wakeups" placeholder="Times woken up" min="0" max="20" value="0">
+                </div>
+                <button onclick="calculateSleepScore()" class="btn">Calculate Sleep Score</button>
+                
+                <div id="sleep-display" class="result-display">
+                    <h3>Sleep Quality Score</h3>
+                    <div class="value"><span id="sleep-score">0</span>/100</div>
+                    <div class="interpretation">Quality: <span id="sleep-interpretation">-</span></div>
+                    
+                    <!-- New: Sleep Chart -->
+                    <div class="chart-container" id="sleep-chart">
+                        <!-- SVG chart will be inserted here by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+  <!-- Footer -->
+  <footer class="footer">
+    <p>© 2025 FitTrack</p>
+    <div class="social-icons">
+        <a href="#" class="social-icon" aria-label="WhatsApp">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+            </svg>
+        </a>
+        <a href="#" class="social-icon" aria-label="Instagram">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.131 5.775.072 7.053.012 8.333 0 8.74 0 12s.015 3.667.072 4.947c.06 1.277.261 2.148.558 2.913.306.788.717 1.459 1.384 2.126.667.666 1.336 1.079 2.126 1.384.766.296 1.636.499 2.913.558C8.333 23.988 8.74 24 12 24s3.667-.015 4.947-.072c1.277-.06 2.148-.262 2.913-.558.788-.306 1.459-.718 2.126-1.384.666-.667 1.079-1.335 1.384-2.126.296-.765.499-1.636.558-2.913.06-1.28.072-1.687.072-4.947s-.015-3.667-.072-4.947c-.06-1.277-.262-2.149-.558-2.913-.306-.789-.718-1.459-1.384-2.126C21.319 1.347 20.651.935 19.86.63c-.765-.297-1.636-.499-2.913-.558C15.667.012 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36 1.057.413 2.227.057 1.266.07 1.646.07 4.85s-.015 3.585-.074 4.85c-.061 1.17-.256 1.805-.421 2.227-.224.562-.479.96-.899 1.382-.419.419-.824.679-1.38.896-.42.164-1.065.36-2.235.413-1.274.057-1.649.07-4.859.07-3.211 0-3.586-.015-4.859-.074-1.171-.061-1.816-.256-2.236-.421-.569-.224-.96-.479-1.379-.899-.421-.419-.69-.824-.9-1.38-.165-.42-.359-1.065-.42-2.235-.045-1.26-.061-1.649-.061-4.844 0-3.196.016-3.586.061-4.861.061-1.17.255-1.814.42-2.234.21-.57.479-.96.9-1.381.419-.419.81-.689 1.379-.898.42-.166 1.051-.361 2.221-.421 1.275-.045 1.65-.06 4.859-.06l.045.03zm0 3.678c-3.405 0-6.162 2.76-6.162 6.162 0 3.405 2.76 6.162 6.162 6.162 3.405 0 6.162-2.76 6.162-6.162 0-3.405-2.76-6.162-6.162-6.162zM12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm7.846-10.405c0 .795-.646 1.44-1.44 1.44-.795 0-1.44-.646-1.44-1.44 0-.794.646-1.439 1.44-1.439.793-.001 1.44.645 1.44 1.439z"/>
+            </svg>
+        </a>
+        <a href="#" class="social-icon" aria-label="Twitter">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M23.954 4.569c-.885.389-1.83.654-2.825.775 1.014-.611 1.794-1.574 2.163-2.723-.951.555-2.005.959-3.127 1.184-.896-.959-2.173-1.559-3.591-1.559-2.717 0-4.92 2.203-4.92 4.917 0 .39.045.765.127 1.124C7.691 8.094 4.066 6.13 1.64 3.161c-.427.722-.666 1.561-.666 2.475 0 1.71.87 3.213 2.188 4.096-.807-.026-1.566-.248-2.228-.616v.061c0 2.385 1.693 4.374 3.946 4.827-.413.111-.849.171-1.296.171-.314 0-.615-.03-.916-.086.631 1.953 2.445 3.377 4.604 3.417-1.68 1.319-3.809 2.105-6.102 2.105-.39 0-.779-.023-1.17-.067 2.189 1.394 4.768 2.209 7.557 2.209 9.054 0 13.999-7.496 13.999-13.986 0-.209 0-.42-.015-.63.961-.689 1.8-1.56 2.46-2.548l-.047-.02z"/>
+            </svg>
+        </a>
+    </div>
+</footer>
+
+<script>
+
+
+     // BMI Calculator Function
+     function calculateBMI() {
+        const weight = parseFloat(document.getElementById('weight').value);
+        const height = parseFloat(document.getElementById('height').value) / 100; // convert cm to meters
+        
+        if (weight && height) {
+            const bmi = weight / (height * height);
+            const bmiResult = document.getElementById('bmi-result');
+            bmiResult.textContent = bmi.toFixed(1);
+            
+            // BMI Categories
+            let category = "";
+            if (bmi < 18.5) category = "Underweight";
+            else if (bmi < 25) category = "Normal weight";
+            else if (bmi < 30) category = "Overweight";
+            else category = "Obese";
+            
+            document.getElementById('bmi-category').textContent = category;
+            document.getElementById('bmi-display').style.display = 'block';
+        }
+    }
+    
+    // Calorie Burn Estimation
+    function calculateCalories() {
+        const activity = document.getElementById('calc-activity').value;
+        const weight = parseFloat(document.getElementById('calc-weight').value);
+        const duration = parseFloat(document.getElementById('calc-duration').value);
+        
+        // MET values (Metabolic Equivalent of Task)
+        const metValues = {
+            'running': 9.8,
+            'walking': 3.5,
+            'cycling': 7.5,
+            'swimming': 8.3,
+            'yoga': 2.5,
+            'weight_training': 3.5
+        };
+        
+        if (activity && weight && duration) {
+            // Calories burned = MET × weight(kg) × duration(hours)
+            const met = metValues[activity] || 4.0; // default to 4.0 if activity not found
+            const caloriesBurned = met * weight * (duration / 60);
+            document.getElementById('calories-result').textContent = Math.round(caloriesBurned);
+            document.getElementById('calories-display').style.display = 'block';
+        }
+    }
+    
+    // Sleep Quality Score
+    function calculateSleepScore() {
+        const duration = parseFloat(document.getElementById('sleep-duration').value);
+        const quality = parseInt(document.getElementById('sleep-quality').value);
+        const wakeups = parseInt(document.getElementById('sleep-wakeups').value);
+        
+        if (duration && quality) {
+            // Simple sleep score calculation
+            // Duration factor (optimal is 7-9 hours)
+            let durationScore = 0;
+            if (duration >= 7 && duration <= 9) durationScore = 50;
+            else if (duration >= 6 && duration < 7) durationScore = 40;
+            else if (duration > 9 && duration <= 10) durationScore = 40;
+            else if (duration >= 5 && duration < 6) durationScore = 30;
+            else if (duration > 10) durationScore = 30;
+            else durationScore = 20;
+            
+            // Quality factor (1-10)
+            const qualityScore = quality * 5;
+            
+            // Wakeups deduction
+            const wakeupDeduction = wakeups * 5;
+            
+            // Calculate final score (max 100)
+            let sleepScore = durationScore + qualityScore - wakeupDeduction;
+            sleepScore = Math.max(0, Math.min(100, sleepScore));
+            
+            document.getElementById('sleep-score').textContent = sleepScore;
+            
+            // Sleep quality interpretation
+            let interpretation = "";
+            if (sleepScore >= 90) interpretation = "Excellent";
+            else if (sleepScore >= 75) interpretation = "Good";
+            else if (sleepScore >= 60) interpretation = "Fair";
+            else if (sleepScore >= 40) interpretation = "Poor";
+            else interpretation = "Very Poor";
+            
+            document.getElementById('sleep-interpretation').textContent = interpretation;
+            document.getElementById('sleep-display').style.display = 'block';
+        }
+    }
+    
+    // Protein Calculator
+    function calculateProtein() {
+        // Protein database - food name and protein per 100g
+        const proteinDatabase = {
+            'chicken_breast': 31,
+            'beef_steak': 26,
+            'salmon': 25,
+            'tofu': 8,
+            'eggs': 13,
+            'greek_yogurt': 10,
+            'milk': 3.4,
+            'cheddar_cheese': 25,
+            'lentils': 9,
+            'chickpeas': 8.9,
+            'black_beans': 8.9,
+            'peanut_butter': 25,
+            'almonds': 21,
+            'quinoa': 4.4,
+            'oats': 16.9,
+            'whey_protein': 80,
+            'protein_bar': 20,
+            'tuna': 30,
+            'turkey_breast': 29,
+            'cottage_cheese': 11
+        };
+        
+        // Get all selected foods
+        const selectedFoods = document.querySelectorAll('.protein-food-item');
+        let totalProtein = 0;
+        let foodDetails = [];
+        
+        // Calculate total protein
+        selectedFoods.forEach(item => {
+            const foodType = item.querySelector('.food-select').value;
+            const quantity = parseFloat(item.querySelector('.food-quantity').value);
+            
+            if (foodType && quantity && proteinDatabase[foodType]) {
+                const proteinAmount = (proteinDatabase[foodType] * quantity / 100);
+                totalProtein += proteinAmount;
+                
+                // Store details for display
+                const foodName = foodType.replace(/_/g, ' ');
+                foodDetails.push({
+                    name: foodName.charAt(0).toUpperCase() + foodName.slice(1),
+                    protein: proteinAmount.toFixed(1),
+                    quantity: quantity
+                });
+            }
+        });
+        
+        if (totalProtein > 0) {
+            // Update the result
+            document.getElementById('protein-total').textContent = totalProtein.toFixed(1);
+            
+            // Calculate the percentage of daily needs
+            const weight = parseFloat(document.getElementById('protein-weight').value) || 70;
+            const activityLevel = document.getElementById('protein-activity').value;
+            
+            // Protein recommendations based on activity level (g per kg of bodyweight)
+            let proteinMultiplier = 0.8; // RDA
+            if (activityLevel === 'moderate') proteinMultiplier = 1.2;
+            else if (activityLevel === 'active') proteinMultiplier = 1.6;
+            else if (activityLevel === 'athlete') proteinMultiplier = 2.0;
+            
+            const dailyNeeds = weight * proteinMultiplier;
+            const percentageOfNeeds = (totalProtein / dailyNeeds) * 100;
+            
+            document.getElementById('protein-daily-needs').textContent = dailyNeeds.toFixed(1);
+            document.getElementById('protein-percentage').textContent = percentageOfNeeds.toFixed(1);
+            
+            // Create the breakdown list
+            const breakdownList = document.getElementById('protein-breakdown-list');
+            breakdownList.innerHTML = '';
+            
+            foodDetails.forEach(food => {
+                const listItem = document.createElement('li');
+                listItem.textContent = `${food.name} (${food.quantity}g): ${food.protein}g protein`;
+                breakdownList.appendChild(listItem);
+            });
+            
+            // Show the results
+            document.getElementById('protein-display').style.display = 'block';
+            document.getElementById('protein-breakdown').style.display = 'block';
+        }
+    }
+    
+    // Add more food items to protein calculator
+    function addFoodItem() {
+        const container = document.getElementById('protein-foods-container');
+        const newItem = document.createElement('div');
+        newItem.className = 'protein-food-item';
+        newItem.innerHTML = `
+            <select class="food-select">
+                <option value="">Select food</option>
+                <option value="chicken_breast">Chicken Breast</option>
+                <option value="beef_steak">Beef Steak</option>
+                <option value="salmon">Salmon</option>
+                <option value="tofu">Tofu</option>
+                <option value="eggs">Eggs</option>
+                <option value="greek_yogurt">Greek Yogurt</option>
+                <option value="milk">Milk</option>
+                <option value="cheddar_cheese">Cheddar Cheese</option>
+                <option value="lentils">Lentils</option>
+                <option value="chickpeas">Chickpeas</option>
+                <option value="black_beans">Black Beans</option>
+                <option value="peanut_butter">Peanut Butter</option>
+                <option value="almonds">Almonds</option>
+                <option value="quinoa">Quinoa</option>
+                <option value="oats">Oats</option>
+                <option value="whey_protein">Whey Protein</option>
+                <option value="protein_bar">Protein Bar</option>
+                <option value="tuna">Tuna</option>
+                <option value="turkey_breast">Turkey Breast</option>
+                <option value="cottage_cheese">Cottage Cheese</option>
+            </select>
+            <input type="number" class="food-quantity" placeholder="Grams" min="1" max="1000">
+            <button type="button" class="remove-food" onclick="this.parentElement.remove();">×</button>
+        `;
+        container.appendChild(newItem);
+    }
+    document.getElementById('themeToggle').addEventListener('click', () => {
+        document.body.dataset.theme = 
+            document.body.dataset.theme === "dark" ? "light" : "dark";
+        localStorage.setItem("theme", document.body.dataset.theme);
+        
+        // Update button text based on theme
+        const themeButton = document.getElementById('themeToggle');
+        if (document.body.dataset.theme === "dark") {
+            themeButton.innerHTML = "☀️ Light Mode";
+        } else {
+            themeButton.innerHTML = "🌙 Dark Mode";
+        }
+    });
+    
+    // Persist theme on reload
+    document.body.dataset.theme = localStorage.getItem("theme") || "light";
+    
+    // Set initial button text based on theme
+    const themeButton = document.getElementById('themeToggle');
+    if (document.body.dataset.theme === "dark") {
+        themeButton.innerHTML = "☀️ Light Mode";
+    } else {
+        themeButton.innerHTML = "🌙 Dark Mode";
+    }
+</script>
+</body>
+</html>
